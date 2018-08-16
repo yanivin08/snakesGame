@@ -1,0 +1,159 @@
+<script>
+window.onload = function(){
+	let canvas = document.createElement('canvas');
+		canvas.width = window.innerWidth - 20;
+		canvas.height = window.innerHeight - 20;
+		canvas.style.border = "1px solid rgb(190,190,190)";
+		document.body.appendChild(canvas);
+		
+	let ctx = canvas.getContext('2d'), game = "start",
+		dir = "", speed = 200, mx = 0,my = 0, nx = 0, ny = 0; snakes = [], foods = [],
+		snakesLength = 10,
+		foodX = Math.floor((canvas.width-20)/20),
+		foodY = Math.floor((canvas.height-20)/20);
+	
+	class snake {
+		constructor(x,y){
+			this.x = x;
+			this.y = y;
+			this.size = 20;
+		}
+		draw(){
+			ctx.beginPath();
+			ctx.rect(this.x,this.y,this.size,this.size);
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+	
+	class food {
+		constructor(){
+			this.x = Math.floor(Math.random() * (foodX - 0 + 1) + 0) * 20;
+			this.y = Math.floor(Math.random() * (foodY - 0 + 1) + 0) * 20;
+			this.size = 20;
+		}
+		draw(){
+			ctx.beginPath();
+			ctx.rect(this.x,this.y,this.size,this.size);
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+	
+	document.addEventListener("keydown",function(x){
+		if(x.key == "ArrowDown"){
+			if(dir != "up"){
+				mx = 0;
+				my = 20;
+				dir = "down"
+			}
+		}else if(x.key == "ArrowRight"){
+			if(dir != "left"){
+				mx = 20;
+				my = 0;
+				dir = "right"
+			}
+		}else if(x.key == "ArrowUp"){
+			if(dir != "down"){
+				mx = 0;
+				my = -20;
+				dir = "up"
+			}
+		}else if(x.key == "ArrowLeft"){
+			if(dir != "right"){
+				mx = -20;
+				my = 0;
+				dir = "left"
+			}
+		}
+	});
+	
+	function createSnake(){
+		let player = new snake(nx,ny);
+		snakes.push(player);
+	}
+	
+	function createFood(){
+		let eat = new food;	
+		foods.push(eat);
+	}
+	
+	function eatFood(mouth){
+		
+		if(dir == "down" && mouth.y + mouth.size == foods[0].y && mouth.x == foods[0].x){
+			foods = foods.slice(1);
+			snakesLength += 1;
+			speed -= 10;
+		}else if(dir == "right" && mouth.x + mouth.size == foods[0].x && mouth.y == foods[0].y){
+			foods = foods.slice(1);
+			snakesLength += 1;
+			speed -= 10;
+		}else if(dir == "up" && mouth.y == foods[0].y + foods[0].size && mouth.x == foods[0].x){
+			foods = foods.slice(1);
+			snakesLength += 1;
+			speed -= 10;
+		}else if(dir == "left" && mouth.x == foods[0].x + foods[0].size && mouth.y == foods[0].y){
+			foods = foods.slice(1);
+			snakesLength += 1;
+			speed -= 10;
+		}
+
+	}
+	
+	
+	function gameOver(head){
+	
+		if(dir == "down" && head.y + head.size > canvas.height){
+			game = "gameover";
+			
+		}else if(dir == "right" && head.x + head.size > canvas.width){
+			game = "gameover";
+			
+		}else if(dir == "up" && head.y < 0){
+			game = "gameover";
+			
+		}else if(dir == "left" && head.x < 0){
+			game = "gameover";
+			
+		}
+		
+		snakes.forEach(function(x){
+			if(dir == "down" && head.y + head.size == x.y && head.x == x.x){
+				game = "gameover";
+			}else if(dir == "right" && head.x + head.size == x.x && head.y ==x.y){
+				game = "gameover";
+			}else if(dir == "up" && head.y == x.y + x.size && head.x == x.x){
+				game = "gameover";
+			}else if(dir == "left" && head.x == x.x + x.size && head.y == x.y){
+				game = "gameover";
+			}
+		});
+	}
+	
+	function startGame(){
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		createSnake();
+		nx += mx;
+		ny += my;
+		if(snakes.length > snakesLength){
+			snakes = snakes.slice(1);
+		}
+		snakes.forEach(x => x.draw());
+		
+		if(foods.length == 0){
+			createFood();
+		}
+		foods.forEach(x => x.draw());
+		eatFood(snakes[snakes.length-1]);
+		gameOver(snakes[snakes.length-1]);
+		if(game == "start"){
+			setTimeout(startGame,50);
+		}
+	}
+
+	
+	startGame();
+	
+	
+}
+</script>
